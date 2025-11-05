@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Principio de Taylor - MetFisTIC (v26.0)</title>
+    <style>
+        /* --- FUENTES DE GOOGLE (OPCIONAL: Hace el texto más limpio) --- */
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
+
+        /* --- ESTILOS GENERALES Y LAYOUT --- */
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5; 
+            color: #2c3e50; 
+            line-height: 1.6;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            min-height: 10vh;
+            max-width: 1000px; 
+            margin: 0 auto;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            background-color: white;
+        }
+        .header {
+            background-color: #3498db; 
+            color: white;
+            padding: 25px 20px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2.2em;
+            font-weight: 700;
+        }
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        /* --- NAVEGACIÓN DE PESTAÑAS (TABS) --- */
+        .tabs {
+            display: flex;
+            justify-content: space-around;
+            background-color: #2980b9; 
+        }
+        .tab-button {
+            flex-grow: 1;
+            padding: 15px 10px;
+            cursor: pointer;
+            border: none;
+            background-color: transparent;
+            color: white;
+            transition: background-color 0.3s, color 0.3s;
+            font-size: 1.05em;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+        }
+        .tab-button:hover {
+            background-color: #3498db;
+        }
+        .tab-button.active {
+            background-color: #ecf0f1; 
+            color: #3498db; 
+            border-bottom: 3px solid #e67e22; 
+        }
+
+        /* --- CONTENIDO DE LAS SECCIONES --- */
+        .content {
+            padding: 30px;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* --- ESTILOS DE LA CALCULADORA (SECCIÓN 1) --- */
+        #calculator-section h2 {
+            color: #3498db;
+            border-bottom: 2px solid #e67e22;
+            padding-bottom: 8px;
+            margin-bottom: 20px;
+        }
+        .formula-display {
+             text-align: center;
+             margin-top: 15px;
+             margin-bottom: 25px;
+             font-size: 1.3em;
+             font-weight: 700;
+             color: #2c3e50;
+        }
+        
+        /* Nuevo estilo para envolver el campo de entrada y su unidad */
+        .input-item-wrapper {
+            display: flex;
+            align-items: flex-start; /* Alinea los ítems arriba */
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .calculator-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); 
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        /* Estilo del cuadro decorativo (solo para el valor) */
+        .input-item {
+            flex-grow: 1; 
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            border: 1px solid #bdc3c7;
+            border-radius: 8px;
+            background-color: #fcfcfc;
+        }
+
+        .input-label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #2c3e50;
+        }
+
+        /* Estilo del campo de texto dentro del cuadro decorativo */
+        .input-item input[type="text"] {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1em;
+            background-color: #ecf0f1;
+            width: 100%; 
+            box-sizing: border-box;
+        }
+        
+        /* Estilo de la unidad (select) fuera del cuadro decorativo */
+        .input-item-wrapper select {
+            width: 100px; 
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1em;
+            background-color: white;
+            align-self: flex-start; 
+            margin-top: 25px; 
+        }
+        
+        /* Títulos y selectores de opción K y G */
+        .option-selector {
+            margin-top: 15px;
+            margin-bottom: 15px;
+            background-color: #e8f0fe;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 5px solid #3498db;
+            display: flex;
+            flex-direction: column;
+        }
+        .option-selector label {
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .option-selector select { /* Mantener para el selector de incógnita */
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1em;
+            background-color: white;
+        }
+        
+        /* Estilos para los nuevos botones de selección (radio-like) */
+        .radio-buttons-group {
+            display: flex;
+            flex-wrap: wrap; 
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .radio-button {
+            flex: 1; 
+            min-width: 180px; 
+            padding: 12px 15px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            background-color: #f0f8ff;
+            color: #34495e;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s;
+            text-align: center;
+            font-weight: 500;
+            user-select: none; 
+        }
+        .radio-button:hover {
+            background-color: #e0f2f7;
+            border-color: #3498db;
+        }
+        .radio-button.active {
+            background-color: #3498db;
+            color: white;
+            border-color: #2980b9;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        .radio-button span {
+            vertical-align: middle; 
+        }
+
+        .sub-section-title {
+            color: #e67e22;
+            font-weight: 700;
+            margin-top: 15px;
+            margin-bottom: 10px;
+            padding-left: 5px;
+            border-left: 3px solid #f39c12;
+        }
+        
+        .calculate-button {
+            display: block;
+            width: 100%;
+            padding: 18px;
+            background-color: #e67e22; 
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.3em;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: background-color 0.3s, transform 0.1s;
+            box-shadow: 0 4px #d35400;
+        }
+        .calculate-button:active {
+            box-shadow: 0 0 #d35400;
+            transform: translateY(4px);
+        }
+
+        #result {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #d1ecf1; 
+            border: 1px solid #bee5eb;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1.2em;
+            text-align: center;
+            color: #0c5460;
+        }
+        #result .result-value {
+             font-size: 1.8em;
+             color: #2980b9;
+        }
+        
+        /* Estilos de error */
+        #result.error {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        
+        /* --- ESTILOS DE IMAGENES (NUEVOS PARA TEORIA) --- */
+        /* Estilo para centrar imágenes directamente dentro del texto */
+        .theory-section img {
+            max-width: 90%;
+            height: auto;
+            display: block; /* Importante para aplicar margin auto */
+            margin: 20px auto; /* Centrado */
+            border: 1px solid #bdc3c7; 
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        /* Estilo para los grupos de imágenes (alineación y centrado) */
+        .image-group {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center; /* Centra el grupo horizontalmente */
+            align-items: flex-start; 
+            margin: 20px auto; /* Centrado del bloque contenedor */
+            gap: 15px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            max-width: 95%; /* Ajusta el ancho para el centrado */
+        }
+        .image-group div {
+            flex: 1 1 280px; /* Ancho base para 3 columnas ajustadas */
+            text-align: center;
+            padding: 10px;
+        }
+        .image-group img {
+            max-width: 100%;
+            margin: 0 auto; /* Centrado dentro de su contenedor flex */
+            padding: 0;
+            border: none;
+            box-shadow: none;
+        }
+        .image-caption {
+            font-size: 0.85em;
+            color: #555;
+            margin-top: 5px;
+        }
+
+
+        /* --- ESTILOS DEL FOOTER --- */
+        .footer {
+            background-color: #34495e; 
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 0.9em;
+            box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 30px; /* Espacio para separar del contenido */
+        }
+
+        /* Nuevo estilo para el cuadro de información en el footer */
+        .footer-info-box {
+            background-color: #e7f3ff; /* Azul claro */
+            border: 1px solid #a8d4ff; /* Borde azul oscuro */
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px auto; /* Centrar y añadir margen */
+            max-width: 800px; /* Limitar el ancho para que no sea demasiado largo */
+            color: #2c3e50; /* Color de texto para el cuadro */
+            text-align: center;
+            line-height: 1.5;
+        }
+        .footer-info-box strong {
+            color: #3498db; /* Un color más vibrante para el texto importante */
+        }
+
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .calculator-grid {
+                grid-template-columns: 1fr;
+            }
+            .input-item-wrapper {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .input-item-wrapper select {
+                width: 100%; 
+                margin-top: 0px; 
+            }
+            .radio-buttons-group {
+                flex-direction: column;
+            }
+            .radio-button {
+                min-width: unset; 
+                width: 100%; 
+            }
+            .image-group div {
+                flex: 1 1 100%;
+            }
+        }
+    </style>
+    <script type="text/javascript" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔬 Principio de Taylor - MetFisTIC</h1>
+            <p>Calculadora y Fundamentos del Endurecimiento por Dislocaciones</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-button active" onclick="showSection('calculator-section', this)">🧪 Calculadora</button>
+            <button class="tab-button" onclick="showSection('theory-section', this)">📚 Fundamentos y Teoría</button>
+            <button class="tab-button" onclick="showSection('manual-section', this)">⚙️ Instrucciones de Uso</button>
+        </div>
+
+        <div class="content">
+            <div id="calculator-section" class="tab-content active">
+                <h2>Cálculo del Esfuerzo de Fluencia (σᵧ)</h2>
+                
+                <div class="formula-display">
+                    σᵧ = σ₀ + K \cdot \sqrt{\rho_D}$$
+                </div>
+                <div class="option-selector">
+                    <label for="unknown_var">🔎 Seleccione la Variable Incógnita:</label>
+                    <select id="unknown_var" onchange="updateInputs()">
+                        <option value="sigma_y">Esfuerzo de Fluencia (σᵧ)</option>
+                        <option value="sigma_0">Esfuerzo de Fricción (σ₀)</option>
+                        <option value="K">Constante de Taylor (K)</option>
+                        <option value="rho_D">Densidad de Dislocaciones (ρD)</option>
+                        <option value="alpha">Factor Cristalino (α)</option>
+                        <option value="G">Módulo de Corte (G)</option>
+                        <option value="b">Vector de Burgers (b)</option>
+                    </select>
+                </div>
+                
+                <div class="option-selector" id="result_unit_selector_container" style="display:none; border-left-color: #e67e22;">
+                    <label for="result_unit_select" id="result_unit_label">Elige la Unidad de Salida para la incógnita ($\sigma_y$):</label>
+                    <select id="result_unit_select"></select>
+                </div>
+                
+                <h3 class="sub-section-title" id="main_vars_title">Variables Principales de Taylor</h3>
+                <div class="calculator-grid" id="main_vars_grid">
+                    <div class="input-item-wrapper" id="wrapper_sigma_y">
+                        <div class="input-item" id="input_sigma_y">
+                            <label class="input-label" for="sigma_y_val">Esfuerzo de Fluencia (σᵧ)</label>
+                            <input type="text" id="sigma_y_val" placeholder="Valor (e.g., 500)" onkeyup="this.value=this.value.replace('.', ',')">
+                        </div>
+                        <select id="sigma_y_unit">
+                            <option value="MPa">MPa</option>
+                            <option value="GPa">GPa</option>
+                            <option value="Pa">Pa</option>
+                        </select>
+                    </div>
+                    
+                    <div class="input-item-wrapper" id="wrapper_sigma_0">
+                        <div class="input-item" id="input_sigma_0">
+                            <label class="input-label" for="sigma_0_val">Esfuerzo de Fricción (σ₀)</label>
+                            <input type="text" id="sigma_0_val" placeholder="Valor (e.g., 50)" onkeyup="this.value=this.value.replace('.', ',')">
+                        </div>
+                        <select id="sigma_0_unit">
+                            <option value="MPa">MPa</option>
+                            <option value="GPa">GPa</option>
+                            <option value="Pa">Pa</option>
+                        </select>
+                    </div>
+                    
+                    <div class="input-item-wrapper" id="wrapper_rho_D">
+                        <div class="input-item" id="input_rho_D">
+                            <label class="input-label" for="rho_D_val">Densidad de Dislocaciones (ρD), 1/m^2</label>
+                            <input type="text" id="rho_D_val" placeholder="Valor (e.g., 1e12)" onkeyup="this.value=this.value.replace('.', ',')">
+                        </div>
+                        <select id="rho_D_unit" disabled style="display: none;"></select>
+                    </div>
+                </div>
+
+                
+<div class="option-selector" id="K_selection_container" style="display:none;">
+                    <label>Definición de K (Constante de Taylor):</label>
+                    <div class="radio-buttons-group">
+                        <div class="radio-button active" id="K_type_directo" onclick="selectKType('directo')">
+                            Valor Directo de K
+                        </div>
+                        <div class="radio-button" id="K_type_calculado" onclick="selectKType('calculado')">
+                            K = α * G * |b| 
+                        </div>
+                        <input type="hidden" id="K_type" value="directo"> 
+</div>
+                </div>
+                
+                <div id="K_controls_section">
+                    <h3 class="sub-section-title" id="K_sub_title" style="display:none;">Variables para K</h3>
+
+                    <div class="calculator-grid" id="K_direct_inputs" style="display:none;">
+                         <div class="input-item-wrapper" id="wrapper_K_direct">
+                            <div class="input-item" id="input_K_direct">
+                                <label class="input-label" for="K_val">Constante de Taylor (K)</label>
+                                <input type="text" id="K_val" placeholder="Valor (e.g., 0,005)" onkeyup="this.value=this.value.replace('.', ',')">
+                            </div>
+                            <select id="K_unit">
+                                <option value="GPa/m">GPa/m</option>
+                                <option value="MPa/m" selected>MPa/m</option>
+                                <option value="Pa/m">Pa/m</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="K_calculated_inputs" style="display:none;">
+                        <div class="calculator-grid">
+                            <div class="input-item-wrapper" id="wrapper_alpha">
+                                <div class="input-item" id="input_alpha">
+                                    <label class="input-label" for="alpha_val">Factor Cristalino (α) (Adimensional)</label>
+                                    <input type="text" id="alpha_val" placeholder="Valor (e.g., 0,3)" onkeyup="this.value=this.value.replace('.', ',')">
+                                </div>
+                                <select id="alpha_unit" disabled style="display: none;"></select>
+                            </div>
+                            
+                            <div class="input-item-wrapper" id="wrapper_b">
+                                <div class="input-item" id="input_b">
+                                    <label class="input-label" for="b_val">Vector de Burgers (b)</label>
+                                    <input type="text" id="b_val" placeholder="Valor (e.g., 0,25)" onkeyup="this.value=this.value.replace('.', ',')">
+                                </div>
+                                <select id="b_unit">
+                                    <option value="m">m</option>
+                                    <option value="cm">cm</option>
+                                    <option value="mm">mm</option>
+                                    <option value="in">in</option>
+                                    <option value="ft">ft</option>
+                                    <option value="nm" selected>nm</option>
+                                    <option value="micrometers">μm</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        
+<div class="option-selector" id="G_selection_container" style="display:none;">
+                            <label>Definición del Módulo de Corte G:</label>
+                            <div class="radio-buttons-group">
+                                <div class="radio-button active" id="G_type_directo" onclick="selectGType('directo')">
+                                    Valor Directo de G
+                                </div>
+                                <div class="radio-button" id="G_type_calculado" onclick="selectGType('calculado')">
+                                    G = E / 2(1 + V) 
+                                </div>
+                                <input type="hidden" id="G_type" value="directo"> 
+</div>
+                        </div>
+                        
+                        <h3 class="sub-section-title" id="G_sub_title" style="display:none;">Variables para G = E / 2(1 + V)</h3>
+
+                        <div class="calculator-grid" id="G_direct_inputs" style="display:none;">
+                            <div class="input-item-wrapper" id="wrapper_G_direct">
+                                <div class="input-item" id="input_G_direct">
+                                    <label class="input-label" for="G_val">Módulo de Corte (G) (Valor Directo)</label>
+                                    <input type="text" id="G_val" placeholder="Valor (e.g., 80)" onkeyup="this.value=this.value.replace('.', ',')">
+                                </div>
+                                <select id="G_unit">
+                                    <option value="GPa">GPa</option>
+                                    <option value="MPa">MPa</option>
+                                    <option value="Pa">Pa</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="G_calculated_inputs" style="display:none;">
+                            <div class="calculator-grid">
+                                <div class="input-item-wrapper" id="wrapper_E">
+                                    <div class="input-item" id="input_E">
+                                        <label class="input-label" for="E_val">Módulo de Elasticidad (E)</label>
+                                        <input type="text" id="E_val" placeholder="Valor (e.g., 200)" onkeyup="this.value=this.value.replace('.', ',')">
+                                    </div>
+                                    <select id="E_unit">
+                                        <option value="GPa">GPa</option>
+                                        <option value="MPa">MPa</option>
+                                        <option value="Pa">Pa</option>
+                                    </select>
+                                </div>
+                                <div class="input-item-wrapper" id="wrapper_V">
+                                    <div class="input-item" id="input_V">
+                                        <label class="input-label" for="V_val">Constante de Poisson (ν) (Adimensional)</label>
+                                        <input type="text" id="V_val" placeholder="Valor (e.g., 0,3)" onkeyup="this.value=this.value.replace('.', ',')">
+                                    </div>
+                                    <select id="V_unit" disabled style="display: none;"></select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="calculate-button" onclick="calculate()">🚀 CALCULAR RESULTADO</button>
+
+                <div id="result">
+                    Esperando datos para iniciar el cálculo.
+                </div>
+                
+            </div>
+            
+            <div id="theory-section" class="tab-content">
+                <h2>📚 Fundamento: Plasticidad, Microestructura y la Ley de Taylor</h2>
+                
+                <h3>El Origen Físico de la Resistencia: Endurecimiento por Deformación (Trabajo en Frío)</h3>
+                <p>La capacidad de un material cristalino para resistir la deformación plástica está intrínsecamente ligada a su microestructura. El Endurecimiento por Deformación, también conocido como trabajo en frío, es un fenómeno fundamental que describe cómo la resistencia y dureza de un material metálico se incrementan cuando es sometido a una deformación plástica permanente a temperaturas por debajo de su punto de recristalización. Este proceso es de vital importancia en la manufactura, como en el laminado, forjado, o estirado de alambres, donde se busca mejorar las propiedades mecánicas finales del producto.</p>
+                <p>A nivel atómico, el endurecimiento por deformación es el resultado directo del incremento significativo en la densidad de dislocaciones (ρD) dentro de la red cristalina del material. Las dislocaciones son defectos de línea que actúan como portadores de la deformación plástica. Cuando el material es deformado, no solo se mueven las dislocaciones existentes, sino que también se generan nuevas dislocaciones y estas se multiplican exponencialmente. La interacción entre estas dislocaciones, especialmente su apilamiento y enmarañamiento, crea campos de esfuerzos localizados que impiden el movimiento libre de otras dislocaciones, es decir, se obstaculizan mutuamente.</p>
+                <p>Esta resistencia interna al movimiento de las dislocaciones es lo que se manifiesta macroscópicamente como un aumento en el Esfuerzo de Fluencia σᵧ y la Resistencia a la Tracción (UTS) del material. El material requiere una mayor energía (mayor esfuerzo aplicado) para continuar deformándose plásticamente porque el movimiento de las dislocaciones se ve cada vez más restringido.</p>
+                <p><strong>Mecanismos de Interacción:</strong> La interacción dominante que causa el endurecimiento es la repulsión de largo alcance entre dislocaciones del mismo signo y la formación de barreras de corto alcance, cuando las dislocaciones en planos diferentes se cruzan. La acumulación de dislocaciones conduce a la formación de una estructura celular o subestructuras de grano con baja desorientación, donde las paredes de las células son enmarañamientos densos de dislocaciones que actúan como barreras formidables al deslizamiento.</p>
+                
+                <h3>La Ley de Taylor para el Endurecimiento: Cuantificando la Resistencia</h3>
+                <p>La Ley de Taylor, propuesta originalmente por G. I. Taylor en la década de 1930, es uno de los pilares de la mecánica de la plasticidad. Proporciona una relación cuantitativa fundamental entre el esfuerzo de fluencia de un material policristalino y la densidad de dislocaciones presentes en su microestructura. Esta ley modela cómo la resistencia a la deformación plástica se incrementa con la acumulación de defectos de línea. La ecuación fundamental es:</p>
+                <p style="text-align:center;">$$ \sigma_y = \sigma_0 + K \cdot \sqrt{\rho_D} $$</p>
+                
+                <h4>Análisis de Cada Variable de la Ecuación de Taylor:</h4>
+                <ul>
+                    <li>Esfuerzo de Fluencia o Límite Elástico (σᵧ):
+                        <p>Representa el nivel de esfuerzo ingenieril a partir del cual un material comienza a exhibir deformación plástica permanente, marcando el fin del comportamiento elástico. Un valor alto de σᵧ indica una mayor resistencia a la deformación plástica. En el contexto de la Ley de Taylor, σᵧ es la resistencia total efectiva del material bajo carga, combinando la resistencia inherente de la red (σ₀) y el endurecimiento inducido por la microestructura de dislocaciones. El endurecimiento se relaciona con ρD debido a que la tensión de cizalladura requerida para mover una dislocación en un bosque de otras dislocaciones es proporcional a la distancia promedio entre ellas, que a su vez es inversamente proporcional a ρD.</p>
+                    </li>
+                    <li>Esfuerzo de Fricción o Esfuerzo Reticular Intrínseco (σ₀):
+                        <p>Este término representa la resistencia al movimiento de una dislocación en un cristal idealmente puro y libre de otros defectos de línea. Es el esfuerzo fundamental necesario para superar la resistencia de la propia red cristalina. Incluye varias contribuciones cruciales:</p>
+                        <ul>
+                            <li>Efecto Peierls-Nabarro: La resistencia que la red cristalina perfecta ejerce sobre el movimiento de una dislocación. Depende de la anchura del núcleo de la dislocación y la periodicidad del potencial de la red. Es significativamente mayor en materiales con enlaces covalentes o estructuras BCC (Metales Refractarios) que en estructuras FCC (Aluminio, Cobre).</li>
+                            <li>Endurecimiento por Solución Sólida: La interacción elástica y química entre el campo de esfuerzos de la dislocación y los átomos de soluto disueltos (impurezas). Estos átomos, al ser de tamaño diferente al del átomo del disolvente, distorsionan la red e impiden el deslizamiento, incrementando σ₀.</li>
+                        </ul>
+                    </li>
+                    <li>Densidad de Dislocaciones (ρD):
+                        <p>Es la medida del enmarañamiento y la acumulación de defectos de línea, definida como la longitud total de las líneas de dislocación por unidad de volumen (L/V), con unidades de m^(-2). Una menor distancia entre dislocaciones implica una mayor dificultad para el movimiento y, por lo tanto, mayor endurecimiento.</p>
+                    </li>
+                    <li>Constante de Taylor o Factor de Endurecimiento (K):
+                        <p>Es el factor de proporcionalidad que define la eficiencia de las dislocaciones para obstaculizarse mutuamente. Esta constante,  K = α * G * |b| , establece la relación entre la microestructura y las propiedades elásticas fundamentales del material. Representa la energía requerida por unidad de longitud de dislocación para vencer la resistencia de otras dislocaciones, normalizada por el factor de orientación.</p>
+                    </li>
+                </ul>
+                
+                <h3>Mecanismos de Plasticidad y los Componentes Constitutivos de K</h3>
+                <p>El deslizamiento de dislocaciones se produce en el sistema cristalográfico de más alta densidad (Plano de Deslizamiento) y en la dirección más cercana al vector de Burgers (<strong style="color:#e67e22;">Dirección de Deslizamiento</strong>). La constante K sintetiza las propiedades que determinan la facilidad o dificultad de este deslizamiento.</p>
+
+                <h4>Vector de Burgers (b) y Tipos de Dislocaciones</h4>
+                <p>El Vector de Burgers (b) define la magnitud y dirección del desplazamiento atómico que se produce cuando una dislocación atraviesa el cristal. Su magnitud (b) es un dato cristalográfico esencial que se relaciona con la distancia interatómica en el sistema de deslizamiento. <strong style="color:#e67e22;">Cuanto mayor sea b, mayor será el campo de esfuerzos elásticos que rodea a la dislocación</strong> y, por lo tanto, mayor será la interacción de endurecimiento.</p>
+                
+                <div style="text-align: center;">
+                    <img src="https://image.slidesharecdn.com/u2estructuracristalina2-170308025212/95/estructura-cristalina-propiedad-de-los-materiales-25-638.jpg?cb=1488941805" alt="Tipos de Dislocaciones: Arista, Tornillo y Mixta" style="max-width: 60%; margin: 20px auto; display: block;">
+                    <div class="image-caption">Representación esquemática de los tipos de dislocaciones (Arista, Tornillo, Mixta) y su relación con el Vector de Burgers (<span style="font-family: serif;">b</span>). El deslizamiento de la dislocación es el mecanismo fundamental de la plasticidad.</div>
+                </div>
+
+                <h4>El Significado Físico de  K = α * G * |b|:</h4>
+                <ul>
+                    <li>Factor Cristalino/Geométrico (α):
+                        <p>También llamado factor de interacción o factor de obstáculo. Este parámetro adimensional corrige la Ley de Taylor por la orientación cristalográfica. No todas las dislocaciones en un bosque de dislocaciones son igualmente efectivas para obstaculizar a una dislocación en movimiento. α promedia la efectividad de las interacciones (cruce de dislocaciones, reacciones entre ellas, y la formación de barreras). Su valor depende del tipo de red (FCC, BCC) y de si el material es monocristalino o policristalino, ya que en los policristales el Factor de Taylor-Bishop-Hill (M) se utiliza a veces en su lugar para relacionar los esfuerzos de cizallamiento con los esfuerzos normales aplicados.</p>
+                    </li>
+                    <li>Módulo de Corte o Módulo de Rigidez (G):
+                        <p>El Módulo de Corte G mide la resistencia de un material a la distorsión volumétrica sin cambio de volumen, es decir, la rigidez frente al cizallamiento. <strong style="color:#e67e22;">El esfuerzo elástico de una dislocación es proporcional al módulo de corte del material</strong>; por lo tanto, un material más rígido (<span style="font-family: serif;">G</span> más alto) tiene dislocaciones más fuertes en su campo de esfuerzos, lo que aumenta intrínsecamente la eficacia de las interacciones de endurecimiento. La relación entre G, el Módulo de Young (E), y el coeficiente de Poisson (v):</p>
+                        <p style="text-align:center;">$$ G = \frac{E}{2(1+\nu)} $$</p>
+                    </li>
+                    <li>Magnitud del Vector de Burgers (b):
+                        <p>El significado principal de esa afirmación es que la Ley de Taylor establece una relación directa y fundamental entre la acumulación de defectos internos en un metal (la densidad de dislocaciones, ρD, la variable microscópica) y su respuesta de resistencia externa (el esfuerzo de fluencia, σᵧ, la propiedad macroscópica). Específicamente, esta relación explica el fenómeno del endurecimiento por deformación: a medida que el metal es forzado a deformarse plásticamente aumentando (ρD), las dislocaciones generadas se obstaculizan mutuamente, lo que obliga al material a requerir un esfuerzo cada vez mayor para continuar la deformación, dando forma a la curva ascendente observada entre el límite elástico inicial y la resistencia máxima.</p>
+                    </li>
+                </ul>
+               
+
+                <h3>Ley de Taylor y la Respuesta Macroscópica: Curva Esfuerzo-Deformación</h3>
+                <p>La Ley de Taylor se utiliza para conectar el estado microscópico cantidad de defectos (ρD) con la propiedad macroscópica de resistencia (σᵧ). La evolución de ρD durante la deformación plástica rige la forma de la curva entre el límite de fluencia inicial y el esfuerzo máximo.</p>
+                <div style="text-align: center;">
+                    <img src="https://www.researchgate.net/profile/Ofelia-Valdes-Rodriguez/publication/267511738/figure/fig1/AS:392212752945154@1470522215391/Figura-1-Curva-tipica-Esfuerzo-Deformacion-de-un-material.png" alt="Gráfica de Esfuerzo-Deformación Ingenieril con zonas clave" style="max-width: 65%; margin: 20px auto; display: block;">
+                    <div class="image-caption">Curva de Esfuerzo-Deformación Típica: La Ley de Taylor modela la pendiente de la región de endurecimiento por deformación (Y a UTS).</div>
+                </div>
+                
+                <p>En la región plástica entre el punto Y y UTS, la densidad de dislocaciones aumenta según la relación:</p>
+                <p style="text-align:center;">$$ d\rho_D = (d\rho_D)_{generación} - (d\rho_D)_{aniquilación} $$</p>
+                <p>La velocidad de endurecimiento es proporcional a la velocidad de incremento de ρD. Una vez que el material ha sido deformado, la Ley de Taylor permite determinar la nueva resistencia (σᵧ) alcanzada en función de la ρD final medida experimentalmente.</p>
+                
+                
+
+                <h3>Métodos Experimentales Avanzados de Cuantificación de ρD.</h3>
+                <p>La fiabilidad de la Ley de Taylor depende de la precisión en la medición de ρD. Las técnicas modernas no solo cuentan dislocaciones, sino que también caracterizan su tipo y distribución, elementos esenciales para el Factor α.</p>
+                
+                <div class="image-group">
+                    <div style="text-align: center;">
+                        <img src="https://tse3.mm.bing.net/th/id/OIP.ir5jyVNWHVV3dzyGzj5gYAHaEK?pid=Api&P=0&h=180" alt="Micrografía TEM de Dislocaciones" style="max-width: 90%; margin: 10px auto; display: block;">
+                        <div class="image-caption">Microscopía Electrónica de Transmisión (TEM):
+                            <p>Técnica de imagen directa a alta resolución. Permite la visualización de dislocaciones individuales y sus subestructuras (células o paredes). La cuantificación se realiza por el método de intersección de líneas o por el análisis de contraste. Es el método patrón oro, aunque requiere muestras muy delgadas (lamelas) y el volumen analizado es pequeño, lo que introduce un posible sesgo estadístico.</p>
+                        </div>
+                    </div>
+                    <div style="text-align: center;">
+                        <img src="https://tse1.mm.bing.net/th/id/OIP.AjuuL134UiwChlQQiupERQHaEK?pid=Api&P=0&h=180" alt="Montaje de Difracción de Rayos X (DRX)" style="max-width: 90%; margin: 10px auto; display: block;">
+                        <div class="image-caption">Difracción de Rayos X (DRX) - Ensanchamiento de Picos:
+                            <p>Técnica indirecta basada en el principio de que los campos de esfuerzos de las dislocaciones introducen microdeformaciones y desorden que ensanchan los picos de difracción de Bragg. Métodos como Williamson-Hall modificado permiten estimar la densidad de dislocaciones promedio de la muestra a partir del ensanchamiento inducido por la deformación. Es ideal para muestras policristalinas grandes y no requiere preparación de lamelas.</p>
+                        </div>
+                    </div>
+                    <div style="text-align: center;">
+                        <img src="http://fisicaexpdemostrativos.uniandes.edu.co/Images/DifraccionElectrones-Montaje.jpg" alt="Difractor de Neutrones" style="max-width: 90%; margin: 10px auto; display: block;">
+                        <div class="image-caption">Difracción de Electrones por Retrodispersión (EBSD):
+                            <p>En un Microscopio Electrónico de Barrido (SEM), el EBSD permite mapear la orientación y la desorientación. La Kernel Average Misorientation (KAM) es un parámetro que cuantifica la desorientación local debida a la acumulación de dislocaciones geométricas, lo que permite inferir la densidad de dislocaciones con una alta resolución espacial. Es especialmente útil para estudiar la formación de subestructuras de grano durante el endurecimiento.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="manual-section" class="tab-content">
+                <h2>⚙️ Instrucciones Detalladas de Uso</h2>
+                <h3>1. Reglas de Ingreso de Datos</h3>
+                <ul>
+                    <li>Decimales: Utilice la coma (,) como separador decimal (ej: 0,35).</li>
+                    <li>Notación Científica: Utilice la letra e para exponentes (ej: 1e12 para 1 x 10^(12)).</li>
+                </ul>
+                <h3>2. Flujo de Trabajo (Inversión)</h3>
+                <ol>
+                    <li>Selección de Incógnita: Elija cualquier variable, principal (σᵧ, σ₀, ρD, K) o secundaria (α, G, b).</li>
+                    <li>Adaptación Automática: La calculadora mostrará solo los campos de entrada estrictamente necesarios para resolver la incógnita elegida, ocultando automáticamente los demás.</li>
+                    <li>Ingreso de Valores: Rellene todos los campos visibles y seleccione las unidades de entrada correctas.</li>
+                    <li>Opciones de K y G (Dato Requerido): Si K o G son datos requeridos, puede elegir entre ingresarlos directamente o calcularlos a partir de sus subcomponentes (<span style="font-family: serif;">K</span> = α * G * |b| o <span style="font-family: serif;">G</span> = E / 2(1+V)).</li>
+                </ol>
+                <h3>3. Opciones de K y G</h3>
+                <p>Los selectores de Definición de K y Definición de G aparecen como botones visuales si la variable no es la incógnita y se requieren subcomponentes para el cálculo. Para el caso de <span style="font-family: serif;">G</span>, puedes ingresarlo directo o dejar que se calcule a partir de <span style="font-family: serif;">E</span> (Módulo de Elasticidad) y V (Constante de Poisson).</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p class="footer-info-box"><strong>¡Esta calculadora forma parte del proyecto MetFisTIC “¡Módulo TIC de Autoestudio que incorpora Simulaciones e IA para Aprendizaje de Conceptos Fundamentales sobre Metalurgia Física”, dirigido por los profesores Pedro Delvasto y Walter Pardavé MetFisTIC fue financiado por la Vicerrectoría Académica de la Universidad Industrial de Santander (2025). La calculadora fue elaborada por Andrés Felipe Caro Miranda y revisada por Alisson Vanessa Guerrero Salcedo!.</strong> </p>
+        </div>
+    </div>
+
+    <script>
+        
+        // --- Funciones de Utilidad y Conversión ---
+
+        function showSection(sectionId, button) {
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.remove('active'));
+            const buttons = document.querySelectorAll('.tab-button');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+            button.classList.add('active');
+        }
+        function cleanInput(value) {
+            if (typeof value !== 'string') return NaN;
+            let cleaned = value.replace(',', '.').replace(' ', '');
+            try { return parseFloat(cleaned); } catch (e) { return NaN; }
+        }
+        function toMPa(value, unit) {
+            value = cleanInput(value);
+            if (isNaN(value)) return NaN;
+            switch (unit) {
+                case 'GPa': return value * 1000;
+                case 'Pa': return value / 1e6;
+                case 'MPa': default: return value;
+            }
+        }
+        function toMeters(value, unit) {
+            value = cleanInput(value);
+            if (isNaN(value)) return NaN;
+            switch (unit) {
+                case 'cm': return value / 100;
+                case 'mm': return value / 1000;
+                case 'in': return value * 0.0254; 
+                case 'ft': return value * 0.3048; 
+                case 'nm': return value / 1e9;
+                case 'micrometers': return value / 1e6;
+                case 'm': default: return value;
+            }
+        }
+        function toMPA_per_M(value, unit) {
+            value = cleanInput(value);
+            if (isNaN(value)) return NaN;
+            switch (unit) {
+                case 'GPa/m': return value * 1000;
+                case 'Pa/m': return value / 1e6;
+                case 'MPa/m': default: return value;
+            }
+        }
+        function fromMPa(value, unit) {
+            if (isNaN(value)) return NaN;
+            switch (unit) {
+                case 'GPa': return value / 1000;
+                case 'Pa': return value * 1e6;
+                case 'MPa': default: return value;
+            }
+        }
+        function fromMPA_per_M(value, unit) {
+            if (isNaN(value)) return NaN;
+            switch (unit) {
+                case 'GPa/m': return value / 1000;
+                case 'Pa/m': return value * 1e6;
+                case 'MPa/m': default: return value;
+            }
+        }
+        function fromMeters(value, unit) {
+            if (isNaN(value)) return NaN;
+            switch (unit) {
+                case 'cm': return value * 100;
+                case 'mm': return value * 1000;
+                case 'in': return value / 0.0254;
+                case 'ft': return value / 0.3048;
+                case 'nm': return value * 1e9;
+                case 'micrometers': return value * 1e6;
+                case 'm': default: return value;
+            }
+        }
+        function fromPerMetersSq(value, unit) { return value; }
+
+
+        // --- Funciones para manejar unidades de la Incógnita ---
+
+        const unitOptions = {
+            sigma_y: [{val: 'MPa', text: 'MPa'}, {val: 'GPa', text: 'GPa'}, {val: 'Pa', text: 'Pa'}],
+            sigma_0: [{val: 'MPa', text: 'MPa'}, {val: 'GPa', text: 'GPa'}, {val: 'Pa', text: 'Pa'}],
+            K: [{val: 'MPa/m', text: 'MPa/m'}, {val: 'GPa/m', text: 'GPa/m'}, {val: 'Pa/m', text: 'Pa/m'}],
+            rho_D: [{val: '1/m^2', text: '1/m²'}], 
+            alpha: [{val: '(Adimensional)', text: 'Adimensional'}],
+            G: [{val: 'GPa', text: 'GPa'}, {val: 'MPa', text: 'MPa'}, {val: 'Pa', text: 'Pa'}],
+            b: [{val: 'nm', text: 'nm'}, {val: 'micrometers', text: 'μm'}, {val: 'm', text: 'm'}, {val: 'cm', text: 'cm'}, {val: 'mm', text: 'mm'}, {val: 'in', text: 'in'}, {val: 'ft', text: 'ft'}],
+            E: [{val: 'GPa', text: 'GPa'}, {val: 'MPa', text: 'MPa'}, {val: 'Pa', text: 'Pa'}],
+            V: [{val: '(Adimensional)', text: 'Adimensional'}]
+        };
+
+        function getReadableSymbol(unknownVar) {
+            const symbols = {
+                sigma_y: 'σᵧ', sigma_0: 'σ₀', K: 'K', rho_D: 'ρD',
+                alpha: 'α', G: 'G', b: 'b', E: 'E', V: 'ν'
+            };
+            return symbols[unknownVar] || unknownVar;
+        }
+
+        function populateUnitSelector(variable, displayName) {
+            const selector = document.getElementById('result_unit_select');
+            const container = document.getElementById('result_unit_selector_container');
+            const label = document.getElementById('result_unit_label');
+            const units = unitOptions[variable] || [];
+            
+            const symbol = getReadableSymbol(variable);
+
+            selector.innerHTML = '';
+            
+            if (units.length > 0 && units[0].val !== '(Adimensional)' && variable !== 'rho_D') {
+                container.style.display = 'flex';
+                label.innerHTML = `Elige la **Unidad de Salida** para ${symbol}:`;
+                units.forEach(unit => {
+                    const option = document.createElement('option');
+                    option.value = unit.val;
+                    option.textContent = unit.text;
+                    if (unit.val === 'MPa' || unit.val === 'MPa/m' || unit.val === 'nm' || unit.val === 'GPa') {
+                         option.selected = true; 
+                    }
+                    selector.appendChild(option);
+                });
+            } else if (variable === 'rho_D' || units.length > 0 && units[0].val === '(Adimensional)') {
+                 container.style.display = 'flex';
+                 // Usamos MathJax para rho_D
+                 label.innerHTML = (variable === 'rho_D') 
+                    ? `La unidad de ${symbol} es **$1/m^2$**`
+                    : `La unidad de ${symbol} es **Adimensional**`;
+                 
+                 const unitVal = (variable === 'rho_D') ? '1/m^2' : '(Adimensional)';
+                 const option = document.createElement('option');
+                 option.value = unitVal;
+                 option.textContent = unitVal.replace('(Adimensional)', 'Adimensional');
+                 selector.appendChild(option);
+
+            } else {
+                container.style.display = 'none'; 
+            }
+            if (window.MathJax) {
+                 MathJax.Hub.Queue(["Typeset", MathJax.Hub, label]);
+            }
+        }
+
+
+        // --- FUNCIONES PARA LOS NUEVOS BOTONES DE SELECCIÓN DE K y G ---
+        function selectKType(type) {
+            document.getElementById('K_type').value = type;
+            document.getElementById('K_type_directo').classList.remove('active');
+            document.getElementById('K_type_calculado').classList.remove('active');
+            document.getElementById(`K_type_${type}`).classList.add('active');
+            updateInputs(); 
+        }
+
+        function selectGType(type) {
+            document.getElementById('G_type').value = type;
+            document.getElementById('G_type_directo').classList.remove('active');
+            document.getElementById('G_type_calculado').classList.remove('active');
+            document.getElementById(`G_type_${type}`).classList.add('active');
+            updateInputs(); 
+        }
+
+
+        // --- FUNCIONES DE CONTROL DE VISIBILIDAD DE INTERFAZ ---
+
+        function toggleVisibility(id, displayStyle) {
+            const element = document.getElementById(`wrapper_${id}`) || document.getElementById(`input_${id}`) || document.getElementById(id);
+            if (element) {
+                element.style.display = displayStyle;
+            }
+        }
+        
+        function resetSecondaryInputs() {
+            // Ocultar todos los contenedores de selección
+            toggleVisibility('K_selection_container', 'none');
+            toggleVisibility('G_selection_container', 'none');
+            toggleVisibility('K_sub_title', 'none');
+            toggleVisibility('G_sub_title', 'none');
+
+            // Ocultar todos los grupos de inputs secundarios
+            toggleVisibility('K_direct_inputs', 'none');
+            toggleVisibility('K_calculated_inputs', 'none');
+            toggleVisibility('G_direct_inputs', 'none');
+            toggleVisibility('G_calculated_inputs', 'none');
+            
+            // Mostrar todos los wrappers de input de las variables (por defecto)
+            const allWrappers = document.querySelectorAll('.input-item-wrapper');
+            allWrappers.forEach(wrapper => wrapper.style.display = 'flex');
+
+            // Variables secundarias específicas (alpha, b, E, V, K_direct, G_direct) se ocultan
+            const secondaryVars = ['K_direct', 'alpha', 'b', 'G_direct', 'E', 'V'];
+            secondaryVars.forEach(id => {
+                toggleVisibility(id, 'none');
+            });
+
+            // Mostrar variables principales
+            toggleVisibility('main_vars_title', 'block');
+            toggleVisibility('main_vars_grid', 'grid');
+            
+            // Asegurar que las unidades de los input-item que sí tienen select se muestren por defecto (si no están ocultos)
+            const unitsWithSelect = ['sigma_y_unit', 'sigma_0_unit', 'K_unit', 'b_unit', 'G_unit', 'E_unit'];
+            unitsWithSelect.forEach(id => {
+                const select = document.getElementById(id);
+                if (select) select.style.display = 'block';
+            });
+        }
+
+        function updateGInputs(unknownVar) {
+            const G_type = document.getElementById('G_type').value;
+            
+            // Ocultar G calculado por defecto
+            toggleVisibility('G_calculated_inputs', 'none');
+            toggleVisibility('G_sub_title', 'none');
+            toggleVisibility('wrapper_E', 'none');
+            toggleVisibility('wrapper_V', 'none');
+            
+            // Si G es un dato requerido (K calculado, alfa o b)
+            const G_is_needed = ['sigma_y', 'sigma_0', 'rho_D', 'alpha', 'b'].includes(unknownVar);
+            
+            if (G_type === 'calculado' && G_is_needed) {
+                toggleVisibility('G_calculated_inputs', 'block');
+                toggleVisibility('G_sub_title', 'block');
+                
+                // Mostrar siempre E y V
+                toggleVisibility('wrapper_E', 'flex'); 
+                toggleVisibility('wrapper_V', 'flex'); 
+            } 
+            
+            // Manejar G_directo
+            toggleVisibility('G_direct_inputs', 'none');
+            toggleVisibility('wrapper_G_direct', 'none');
+
+            // Si G es necesario (para calcular K o un subcomponente) y el usuario eligió Directo
+            if (G_is_needed && G_type === 'directo') {
+                toggleVisibility('G_direct_inputs', 'grid');
+                toggleVisibility('wrapper_G_direct', 'flex'); 
+            }
+        }
+
+        function updateKInputs(unknownVar) {
+            const K_type = document.getElementById('K_type').value;
+            
+            // Ocultar todo lo de K por defecto
+            toggleVisibility('K_selection_container', 'none');
+            toggleVisibility('K_direct_inputs', 'none');
+            toggleVisibility('K_calculated_inputs', 'none');
+            toggleVisibility('K_sub_title', 'none');
+            toggleVisibility('G_selection_container', 'none');
+
+            // Variables de K calculado
+            toggleVisibility('wrapper_K_direct', 'none');
+            toggleVisibility('wrapper_alpha', 'none');
+            toggleVisibility('wrapper_b', 'none');
+            
+            // Asegurarse de que los botones activos de K y G se mantengan visualmente
+             const currentKType = document.getElementById('K_type').value;
+             document.getElementById('K_type_directo').classList.remove('active');
+             document.getElementById('K_type_calculado').classList.remove('active');
+             document.getElementById(`K_type_${currentKType}`).classList.add('active');
+             
+             const currentGType = document.getElementById('G_type').value;
+             document.getElementById('G_type_directo').classList.remove('active');
+             document.getElementById('G_type_calculado').classList.remove('active');
+             document.getElementById(`G_type_${currentGType}`).classList.add('active');
+
+
+            // --- Lógica para variables principales de Taylor ($\sigma_y, \sigma_0, \rho_D$) ---
+            const isMainVariable = ['sigma_y', 'sigma_0', 'rho_D'].includes(unknownVar);
+            if (isMainVariable) {
+                 toggleVisibility('K_selection_container', 'flex');
+                 
+                 if (K_type === 'directo') {
+                     toggleVisibility('K_direct_inputs', 'grid');
+                     toggleVisibility('wrapper_K_direct', 'flex');
+                 } else { // K_type === 'calculado'
+                     toggleVisibility('K_calculated_inputs', 'block');
+                     toggleVisibility('K_sub_title', 'block');
+                     document.getElementById('K_sub_title').textContent = 'Variables para K = α ⋅ G ⋅ b';
+
+                     toggleVisibility('wrapper_alpha', 'flex');
+                     toggleVisibility('wrapper_b', 'flex');
+                     toggleVisibility('G_selection_container', 'flex'); 
+                     
+                     updateGInputs(unknownVar); 
+                 }
+                 return;
+            }
+            
+            // --- Lógica para la incógnita K ---
+            if (unknownVar === 'K') { 
+                // K se calcula por fórmula principal
+                return;
+            }
+
+
+            // --- Lógica para la incógnita G ---
+            if (unknownVar === 'G') {
+                // Incógnita G -> necesita K (Directo), alpha, b
+                
+                // Ocultar variables principales
+                toggleVisibility('main_vars_title', 'none');
+                toggleVisibility('main_vars_grid', 'none');
+
+                // Título de la sección
+                toggleVisibility('K_sub_title', 'block');
+                document.getElementById('K_sub_title').textContent = 'Variables para G (G = K / (α ⋅ b))';
+                if (window.MathJax) {
+                   MathJax.Hub.Queue(["Typeset", MathJax.Hub, "K_sub_title"]);
+                }
+                
+                // K (Dato)
+                toggleVisibility('K_direct_inputs', 'grid'); 
+                toggleVisibility('wrapper_K_direct', 'flex'); 
+
+                // alpha y b (Datos)
+                toggleVisibility('K_calculated_inputs', 'block');
+                toggleVisibility('wrapper_alpha', 'flex');
+                toggleVisibility('wrapper_b', 'flex');
+                
+                // G, E y V no deben aparecer.
+                toggleVisibility('G_selection_container', 'none'); 
+                toggleVisibility('G_sub_title', 'none');
+                toggleVisibility('G_calculated_inputs', 'none');
+                toggleVisibility('G_direct_inputs', 'none');
+                
+                return;
+            }
+
+
+            // --- Lógica para subcomponentes de K ($\alpha, b$) ---
+            const isAlphaOrB = ['alpha', 'b'].includes(unknownVar);
+            if (isAlphaOrB) {
+                 
+                // Ocultar variables principales
+                toggleVisibility('main_vars_title', 'none');
+                toggleVisibility('main_vars_grid', 'none');
+                
+                // Título de la sección
+                toggleVisibility('K_sub_title', 'block');
+                const K_title_element = document.getElementById('K_sub_title');
+                K_title_element.textContent = 'Variables para K (K = $\\alpha \\cdot G \\cdot b$)';
+                if (window.MathJax) {
+                   MathJax.Hub.Queue(["Typeset", MathJax.Hub, "K_sub_title"]);
+                }
+
+                // Mostrar los componentes necesarios para calcular K
+                toggleVisibility('K_calculated_inputs', 'block');
+                toggleVisibility('wrapper_alpha', 'flex');
+                toggleVisibility('wrapper_b', 'flex');
+                
+                // Mostrar K (que se convierte en dato)
+                toggleVisibility('K_direct_inputs', 'grid');
+                toggleVisibility('wrapper_K_direct', 'flex');
+                
+                // Ocultar la incógnita específica
+                toggleVisibility(`wrapper_${unknownVar}`, 'none');
+                
+                // G es un dato requerido: mostramos el selector de G
+                toggleVisibility('G_selection_container', 'flex'); 
+                updateGInputs(unknownVar); // Llamamos para mostrar G directo o E/V
+                
+                return; 
+            }
+        }
+
+
+        function updateInputs() {
+            const unknownVar = document.getElementById('unknown_var').value;
+            const varDisplay = getReadableSymbol(unknownVar); 
+            
+            resetSecondaryInputs(); 
+            populateUnitSelector(unknownVar, varDisplay);
+
+            const mainVariables = ['sigma_y', 'sigma_0', 'rho_D', 'K'];
+            mainVariables.forEach(v => toggleVisibility(`wrapper_${v}`, 'none'));
+            
+            
+            // --- Lógica para variables principales de Taylor y K, alpha, G, b ---
+            
+            // Mostrar las variables de Taylor if la incógnita es principal o K
+            if (['sigma_y', 'sigma_0', 'rho_D', 'K'].includes(unknownVar)) {
+                 toggleVisibility('main_vars_title', 'block');
+                 toggleVisibility('main_vars_grid', 'grid');
+                 
+                 mainVariables.forEach(v => {
+                    if (v !== unknownVar) {
+                        toggleVisibility(`wrapper_${v}`, 'flex');
+                    }
+                 });
+            }
+
+            // Llamar a la lógica de K que ahora maneja todos los subcomponentes
+            updateKInputs(unknownVar);
+        }
+
+        // --- LÓGICA PRINCIPAL DE CÁLCULO ---
+
+        function calculate() {
+            const unknownVar = document.getElementById('unknown_var').value;
+            const resultDiv = document.getElementById('result');
+            resultDiv.classList.remove('error');
+            resultDiv.innerHTML = `Calculando...`;
+
+            let result_unit_out = document.getElementById('result_unit_select').value;
+
+            let sigma_y_val = document.getElementById('sigma_y_val').value;
+            let sigma_0_val = document.getElementById('sigma_0_val').value;
+            let rho_D_val = document.getElementById('rho_D_val').value;
+            let alpha_val = document.getElementById('alpha_val').value;
+            let b_val = document.getElementById('b_val').value;
+            let E_val = document.getElementById('E_val').value;
+            let V_val = document.getElementById('V_val').value;
+            let G_val = document.getElementById('G_val').value;
+            let K_val = document.getElementById('K_val').value;
+
+            let sigma_y_MPa = toMPa(sigma_y_val, document.getElementById('sigma_y_unit').value);
+            let sigma_0_MPa = toMPa(sigma_0_val, document.getElementById('sigma_0_unit').value);
+            let rho_D = cleanInput(rho_D_val);
+            let alpha = cleanInput(alpha_val);
+            let b_meters = toMeters(b_val, document.getElementById('b_unit').value);
+            let E_MPa = toMPa(E_val, document.getElementById('E_unit').value);
+            let V = cleanInput(V_val);
+            let G_MPa = toMPa(G_val, document.getElementById('G_unit').value);
+            let K_MPA_per_M = toMPA_per_M(K_val, document.getElementById('K_unit').value);
+
+            let result_val_base = NaN;
+            let error_message = '';
+
+            try {
+                let K_calc = K_MPA_per_M; 
+                let G_calc = G_MPa;      
+                
+                const K_type = document.getElementById('K_type').value;
+                const G_type = document.getElementById('G_type').value;
+                
+                const isMainEqIncognita = ['sigma_y', 'sigma_0', 'rho_D'].includes(unknownVar);
+                const needsKCalculated = isMainEqIncognita && K_type === 'calculado';
+                const needsKDirect = isMainEqIncognita && K_type === 'directo';
+                
+                // Determinar si G es un dato requerido (K calculado, alpha o b)
+                const G_is_required = needsKCalculated || ['alpha', 'b'].includes(unknownVar);
+
+
+                // --- CÁLCULO DE G (Determina G_calc) ---
+                
+                // G es la incógnita: G = K / (alpha * b)
+                if (unknownVar === 'G') {
+                    if (isNaN(K_MPA_per_M) || isNaN(alpha) || isNaN(b_meters) || alpha === 0 || b_meters === 0) throw new Error('Faltan valores (K, $\\alpha$, b) o $\\alpha$ o b son cero.');
+                    result_val_base = K_MPA_per_M / (alpha * b_meters); 
+                    result_val_base = fromMPa(result_val_base, result_unit_out);
+                    return; // Termina el cálculo si es G
+                }
+                
+                // G es requerido como dato para K (o alpha, b)
+                if (G_is_required) {
+                    if (G_type === 'calculado') {
+                         if (isNaN(E_MPa) || isNaN(V) || (1 + V) === 0) throw new Error('Faltan valores para E o $\\nu$ para calcular G.');
+                         G_calc = E_MPa / (2 * (1 + V));
+                    } else { // G_type === 'directo'
+                         if (isNaN(G_MPa)) throw new Error('Falta el valor de G (Módulo de Corte).');
+                         G_calc = G_MPa;
+                    }
+                }
+
+
+                // --- CÁLCULO DE K (Determina K_calc) ---
+                if (unknownVar === 'K') {
+                    // K se calcula por la fórmula principal
+                    if (isNaN(sigma_y_MPa) || isNaN(sigma_0_MPa) || isNaN(rho_D) || rho_D <= 0) throw new Error('Faltan valores ($\sigma_y$, $\sigma_0$, $\\rho_D$), o $\\rho_D \\le 0$.');
+                    if (sigma_y_MPa < sigma_0_MPa) throw new Error('$\sigma_y$ debe ser mayor que $\sigma_0$.');
+                    result_val_base = (sigma_y_MPa - sigma_0_MPa) / Math.sqrt(rho_D); 
+                    result_val_base = fromMPA_per_M(result_val_base, result_unit_out);
+                    return;
+                }
+
+                // Si K es necesario y es calculado para resolver una variable principal
+                if (needsKCalculated) {
+                     if (isNaN(alpha) || isNaN(b_meters)) throw new Error('Faltan valores para $\\alpha$ o b para calcular K.');
+                     K_calc = alpha * G_calc * b_meters;
+                }
+                
+                // Si K es necesario y es directo para resolver una variable principal
+                if (needsKDirect && isNaN(K_MPA_per_M)) throw new Error('Falta el valor directo de K.');
+
+
+                // --- CÁLCULO DE VARIABLES PRINCIPALES ($\sigma_y, \sigma_0, \rho_D$) ---
+                switch (unknownVar) {
+                    case 'sigma_y':
+                        if (isNaN(sigma_0_MPa) || isNaN(K_calc) || isNaN(rho_D) || rho_D < 0) throw new Error('Faltan valores ($\sigma_0$, K, $\\rho_D$) o $\\rho_D < 0$.');
+                        result_val_base = sigma_0_MPa + K_calc * Math.sqrt(rho_D);
+                        result_val_base = fromMPa(result_val_base, result_unit_out);
+                        break;
+
+                    case 'sigma_0':
+                        if (isNaN(sigma_y_MPa) || isNaN(K_calc) || isNaN(rho_D) || rho_D < 0) throw new Error('Faltan valores ($\sigma_y$, K, $\\rho_D$) o $\\rho_D < 0$.');
+                        result_val_base = sigma_y_MPa - K_calc * Math.sqrt(rho_D);
+                        if (result_val_base < 0) throw new Error('El cálculo de $\\sigma_0$ resulta negativo. $\sigma_y$ debe ser mayor que el endurecimiento.');
+                        result_val_base = fromMPa(result_val_base, result_unit_out);
+                        break;
+
+                    case 'rho_D':
+                        if (isNaN(sigma_y_MPa) || isNaN(sigma_0_MPa) || isNaN(K_calc) || K_calc === 0) throw new Error('Faltan valores ($\sigma_y$, $\sigma_0$, K), o K=0.');
+                        if (sigma_y_MPa < sigma_0_MPa) throw new Error('$\sigma_y$ debe ser mayor que $\sigma_0$.');
+                        result_val_base = Math.pow((sigma_y_MPa - sigma_0_MPa) / K_calc, 2);
+                        result_unit_out = '1/m^2'; 
+                        result_val_base = fromPerMetersSq(result_val_base, result_unit_out);
+                        break;
+                        
+                    // --- CÁLCULO DE SUBCOMPONENTES DE K ($\alpha, b$) ---
+                    case 'alpha':
+                        // K es conocido (K_MPA_per_M) y G_calc es conocido
+                        if (isNaN(K_MPA_per_M) || isNaN(G_calc) || isNaN(b_meters) || G_calc === 0 || b_meters === 0) throw new Error('Faltan valores (K, G, b) o G o b son cero.');
+                        result_val_base = K_MPA_per_M / (G_calc * b_meters);
+                        result_unit_out = '(Adimensional)';
+                        break;
+                        
+                    case 'b':
+                        // K es conocido (K_MPA_per_M) y G_calc es conocido
+                        if (isNaN(K_MPA_per_M) || isNaN(alpha) || isNaN(G_calc) || alpha === 0 || G_calc === 0) throw new Error('Faltan valores (K, $\\alpha$, G) o $\\alpha$ o G son cero.');
+                        result_val_base = K_MPA_per_M / (alpha * G_calc); 
+                        result_val_base = fromMeters(result_val_base, result_unit_out);
+                        break;
+                }
+            } catch (e) {
+                error_message = e.message;
+            }
+
+            if (!isNaN(result_val_base) && error_message === '') {
+                resultDiv.classList.remove('error');
+                resultDiv.style.backgroundColor = '#d1ecf1'; 
+                
+                let formatted_result;
+                if (unknownVar === 'alpha' || unknownVar === 'V') {
+                    formatted_result = result_val_base.toFixed(4).replace('.', ',');
+                } else if (Math.abs(result_val_base) >= 1e6 || Math.abs(result_val_base) < 1e-4) {
+                    formatted_result = result_val_base.toExponential(4).replace('.', ',');
+                } else {
+                    formatted_result = result_val_base.toFixed(4).replace('.', ',');
+                }
+                
+                const varDisplay = {
+                    sigma_y: 'Esfuerzo de Fluencia (σᵧ)', sigma_0: 'Esfuerzo de Fricción (σ₀)', 
+                    K: 'Constante de Taylor (K)', rho_D: 'Densidad de Dislocaciones (ρD)',
+                    alpha: 'Factor Cristalino (α)', G: 'Módulo de Corte (G)',
+                    b: 'Vector de Burgers (b)', E: 'Módulo de Elasticidad (E)', V: 'Constante de Poisson (ν)'
+                }[unknownVar];
+
+                let displayUnit = result_unit_out.replace('(Adimensional)', 'Adimensional').replace('1/m^2', '$1/m^2$');
+
+                resultDiv.innerHTML = `
+                    <p style="margin: 0;">Resultado para **${varDisplay}**:</p>
+                    <div class="result-value">${formatted_result} ${displayUnit}</div>
+                `;
+                 if (window.MathJax) {
+                     MathJax.Hub.Queue(["Typeset", MathJax.Hub, "result"]);
+                }
+            } else {
+                resultDiv.classList.add('error');
+                resultDiv.innerHTML = `
+                    <p style="font-weight: bold;">❌ ERROR DE CÁLCULO</p>
+                    <p>${error_message || 'Verifique los datos ingresados y el formato (coma para decimal, notación e).'} </p>
+                `;
+            }
+        }
+
+        // Inicializar la interfaz al cargar la página
+        window.onload = function() {
+            showSection('calculator-section', document.querySelector('.tab-button.active'));
+            
+            // Inicializar los botones de K y G al cargar (solo visual y valor hidden)
+            const initialKType = document.getElementById('K_type').value;
+            document.getElementById(`K_type_${initialKType}`).classList.add('active');
+            
+            const initialGType = document.getElementById('G_type').value;
+            document.getElementById(`G_type_${initialGType}`).classList.add('active');
+
+            // Despacha el cambio de la variable principal para activar la lógica completa
+            document.getElementById('unknown_var').dispatchEvent(new Event('change'));
+            
+            if (window.MathJax) {
+                 MathJax.Hub.Queue(["Typeset", MathJax.Hub, "calculator-section"]);
+                 MathJax.Hub.Queue(["Typeset", MathJax.Hub, "theory-section"]);
+            }
+        };
+    </script>
+</body>
+</html>
